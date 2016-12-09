@@ -1,0 +1,359 @@
+input: "feat"
+input_shape {
+  dim: 1
+  dim: 4096
+}
+force_backward: true
+layer {
+  name: "defc7"
+  type: "InnerProduct"
+  bottom: "feat"
+  top: "defc7"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "relu_defc7"
+  type: "ReLU"
+  bottom: "defc7"
+  top: "defc7"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "defc6"
+  type: "InnerProduct"
+  bottom: "defc7"
+  top: "defc6"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "relu_defc6"
+  type: "ReLU"
+  bottom: "defc6"
+  top: "defc6"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "defc5"
+  type: "InnerProduct"
+  bottom: "defc6"
+  top: "defc5"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layer {
+  name: "relu_defc5"
+  type: "ReLU"
+  bottom: "defc5"
+  top: "defc5"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "reshape"
+  type: "Reshape"
+  bottom: "defc5"
+  top: "reshape_defc5"
+  reshape_param {
+    shape { 
+      dim: 1 
+      dim: 256
+      dim: 4
+      dim: 4
+    }
+  }
+}
+layer {
+  name: "deconv5"           
+  type: "Deconvolution"
+  bottom: "reshape_defc5"
+  top: "deconv5"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_deconv5"
+  type: "ReLU"
+  bottom: "deconv5"
+  top: "deconv5"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "conv5_1"           
+  type: "Deconvolution"
+  bottom: "deconv5"
+  top: "conv5_1"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_conv5_1"
+  type: "ReLU"
+  bottom: "conv5_1"
+  top: "conv5_1"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "deconv4"           
+  type: "Deconvolution"
+  bottom: "conv5_1"
+  top: "deconv4"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_deconv4"
+  type: "ReLU"
+  bottom: "deconv4"
+  top: "deconv4"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "conv4_1"           
+  type: "Deconvolution"
+  bottom: "deconv4"
+  top: "conv4_1"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_conv4_1"
+  type: "ReLU"
+  bottom: "conv4_1"
+  top: "conv4_1"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "deconv3"           
+  type: "Deconvolution"
+  bottom: "conv4_1"
+  top: "deconv3"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_deconv3"
+  type: "ReLU"
+  bottom: "deconv3"
+  top: "deconv3"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "conv3_1"           
+  type: "Deconvolution"
+  bottom: "deconv3"
+  top: "conv3_1"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 128
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_conv3_1"
+  type: "ReLU"
+  bottom: "conv3_1"
+  top: "conv3_1"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "deconv2"           
+  type: "Deconvolution"
+  bottom: "conv3_1"
+  top: "deconv2"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 64
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_deconv2"
+  type: "ReLU"
+  bottom: "deconv2"
+  top: "deconv2"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "deconv1"           
+  type: "Deconvolution"
+  bottom: "deconv2"
+  top: "deconv1"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 32
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    engine: CUDNN
+  }
+}
+layer {
+  name: "relu_deconv1"
+  type: "ReLU"
+  bottom: "deconv1"
+  top: "deconv1"
+  relu_param {
+    negative_slope: 0.3
+  }
+}
+layer {
+  name: "deconv0"           
+  type: "Deconvolution"
+  bottom: "deconv1"
+  top: "deconv0"
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 3
+    pad: 1
+    kernel_size: 4
+    stride: 2
+    engine: CUDNN
+  }
+}
