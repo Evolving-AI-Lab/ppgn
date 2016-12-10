@@ -96,12 +96,12 @@ Note that we often obtain mixed results with this particular text-to-image model
 
 ### Using your own condition models
 * If using your own condition network, you should search for the parameters that produces the best images for your model (epsilon1, epsilon2, epsilon3 or learning rates). One simple way to do this is sweeping across different parameters.
-* Note that this script would work well with Tensorflow models as well because they all talk Python
+* Note that this script should work with Tensorflow models as well because they all talk Python
 
 ## 3. Ideas
 Here are a few (crazy?) ideas that one could play with PPGNs:
 
-1. One can generate objects in a specific region of the image, similar to `Learning What and Where to Draw` Reed et al. (2016), by conditioning on a region of the last heatmap of a fully convolutional network or a semantic segmentation network.
+1. One can generate objects in a specific region of the image, similar to `Learning What and Where to Draw` Reed et al. (2016), by conditioning on a region of the last heatmap of a fully convolutional classification network or a semantic segmentation network.
 2. Plugin a better image captioning model e.g. the [Show and Tell](https://research.googleblog.com/2016/09/show-and-tell-image-captioning-open.html)
 3. Synthesize a Music Video by sampling images conditioned on lyrics.
 
