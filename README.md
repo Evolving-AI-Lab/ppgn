@@ -92,7 +92,7 @@ Running the above longer could can produce [many other types of faces](http://ww
     <img src="examples/a_church_steeple_that_has_a_clock_on_it.jpg" width=600px>
 </p>
 
-Note that we often obtain mixed results with this particular text-to-image model. For some words, it works pretty well, but for others it struggles to produce reasonable images. The space of language in this model here still needs further exploration. As a starting point, here are some [sentences](sentences.txt) that produce reasonable images.
+Note that we often obtain mixed results with this particular text-to-image model. For some words, it works pretty well, but for others it struggles to produce reasonable images. While the language space in this model still needs further exploration, as a starting point, here are some [sentences](misc/sentences.txt) that produce reasonable images.
 
 ### Using your own condition models
 * If using your own condition network, you should search for the parameters that produces the best images for your model (epsilon1, epsilon2, epsilon3 or learning rates). One simple way to do this is sweeping across different parameters.
