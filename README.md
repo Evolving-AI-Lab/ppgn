@@ -21,10 +21,10 @@ For more information regarding the paper, please visit www.evolvingai.org/ppgn
 This code is built on top of Caffe. You'll need to install the following:
 * Install Caffe; follow the official [installation instructions](http://caffe.berkeleyvision.org/installation.html).
 * Build the Python bindings for Caffe
- * If you want to try example 5 (image captioning) You would need instead to use the recurrent branch of the Caffe provided [here](http://jeffdonahue.com/lrcn)
+ * If you want to try example 5 (image captioning) You would need instead to use the `recurrent` branch of the Caffe provided [here](http://jeffdonahue.com/lrcn)
 * You can optionally build Caffe with the GPU option to make it run faster (recommended)
 * Make sure the path to your `caffe/python` folder in [settings.py](settings.py#L2) is correct
-* Install [ImageMagick](http://www.imagemagick.org/script/binary-releases.php) command-line interface on your system.
+* Install [ImageMagick](http://www.imagemagick.org/script/binary-releases.php) command-line interface on your system (for post-processing the images)
 
 ### Downloading models
 You will need to download a few models to run the examples below. There are `download.sh` scripts provided for your convenience.
