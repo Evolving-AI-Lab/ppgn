@@ -21,7 +21,7 @@ For more information regarding the paper, please visit www.evolvingai.org/ppgn
 This code is built on top of Caffe. You'll need to install the following:
 * Install Caffe; follow the official [installation instructions](http://caffe.berkeleyvision.org/installation.html).
 * Build the Python bindings for Caffe
- * If you want to try example 5 (image captioning) You would need instead to use the `recurrent` branch of the Caffe provided [here](http://jeffdonahue.com/lrcn)
+ * If you want to try example 5 (image captioning), you would need to use the Caffe provided [here](https://github.com/anguyen8/caffe_lrcn) instead
 * You can optionally build Caffe with the GPU option to make it run faster (recommended)
 * Make sure the path to your `caffe/python` folder in [settings.py](settings.py#L2) is correct
 * Install [ImageMagick](http://www.imagemagick.org/script/binary-releases.php) command-line interface on your system (for post-processing the images)
@@ -83,7 +83,7 @@ Running the above longer could can produce [many other types of faces](http://ww
 <p align="center"><i>30 random samples that highly activate a "food detector" conv5 neuron.</i></p>
 
 [5_caption_conditional_sampling.sh](5_caption_conditional_sampling.sh): We can also replace the image classifier network in previous examples with a pre-trained image captioning network to form a text-to-image model without even re-training anything. The image captioning model in this example is the LRCN model in Donahue et al (2015) [1]. 
-* You would need to use the `recurrent` branch of the Caffe provided [here](http://jeffdonahue.com/lrcn) and update the path to Caffe accordingly in [settings.py](settings.py#L2)
+* You would need to use the Caffe provided [here](https://github.com/anguyen8/caffe_lrcn) and update the path to Caffe accordingly in [settings.py](settings.py#L2)
 * The list of words supported are [here](misc/vocabulary.txt)
 
 * Running `./5_caption_conditional_sampling.sh a_church_steeple_that_has_a_clock_on_it` produces this result:
