@@ -104,6 +104,7 @@ Here are a few (crazy?) ideas that one could play with PPGNs:
 1. One can generate objects in a specific region of the image, similar to `Learning What and Where to Draw` Reed et al. (2016), by conditioning on a region of the last heatmap of a fully convolutional classification network or a semantic segmentation network.
 2. Plugin a better image captioning model e.g. the [Show and Tell](https://research.googleblog.com/2016/09/show-and-tell-image-captioning-open.html)
 3. Synthesize a Music Video by sampling images conditioned on lyrics.
+4. There are more and crazier ideas to do with PPGNs, feel free to reach out if you want to chat.
 
 ## 4. Licenses
 Note that the code in this repository is licensed under MIT License, but, the pre-trained condition models used by the code have their own licenses. Please carefully check them before use. 
