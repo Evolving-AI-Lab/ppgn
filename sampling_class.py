@@ -19,7 +19,7 @@ import util
 from sampler import Sampler
 
 if settings.gpu:
-    caffe.set_device(1) # sampling on GPU (recommended for speed) 
+    #caffe.set_device(1) # GPU ID
     caffe.set_mode_gpu() # sampling on GPU (recommended for speed) 
 
 class ClassConditionalSampler(Sampler):

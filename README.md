@@ -21,10 +21,10 @@ For more information regarding the paper, please visit www.evolvingai.org/ppgn
 This code is built on top of Caffe. You'll need to install the following:
 * Install Caffe; follow the official [installation instructions](http://caffe.berkeleyvision.org/installation.html).
 * Build the Python bindings for Caffe
- * If you want to try example 5 (image captioning) You would need instead to use the recurrent branch of the Caffe provided [here](http://jeffdonahue.com/lrcn)
+ * If you want to try example 5 (image captioning), you would need to use the Caffe provided [here](https://github.com/anguyen8/caffe_lrcn) instead
 * You can optionally build Caffe with the GPU option to make it run faster (recommended)
 * Make sure the path to your `caffe/python` folder in [settings.py](settings.py#L2) is correct
-* Install [ImageMagick](http://www.imagemagick.org/script/binary-releases.php) command-line interface on your system.
+* Install [ImageMagick](http://www.imagemagick.org/script/binary-releases.php) command-line interface on your system (for post-processing the images)
 
 ### Downloading models
 You will need to download a few models to run the examples below. There are `download.sh` scripts provided for your convenience.
@@ -83,7 +83,7 @@ Running the above longer could can produce [many other types of faces](http://ww
 <p align="center"><i>30 random samples that highly activate a "food detector" conv5 neuron.</i></p>
 
 [5_caption_conditional_sampling.sh](5_caption_conditional_sampling.sh): We can also replace the image classifier network in previous examples with a pre-trained image captioning network to form a text-to-image model without even re-training anything. The image captioning model in this example is the LRCN model in Donahue et al (2015) [1]. 
-* You would need to use the `recurrent` branch of the Caffe provided [here](http://jeffdonahue.com/lrcn) and update the path to Caffe accordingly in [settings.py](settings.py#L2)
+* You would need to use the Caffe provided [here](https://github.com/anguyen8/caffe_lrcn) and update the path to Caffe accordingly in [settings.py](settings.py#L2)
 * The list of words supported are [here](misc/vocabulary.txt)
 
 * Running `./5_caption_conditional_sampling.sh a_church_steeple_that_has_a_clock_on_it` produces this result:
@@ -92,18 +92,19 @@ Running the above longer could can produce [many other types of faces](http://ww
     <img src="examples/a_church_steeple_that_has_a_clock_on_it.jpg" width=600px>
 </p>
 
-Note that we often obtain mixed results with this text-to-image model. For some words, it works pretty well, but for others it struggle to produce reasonable images.
+Note that we often obtain mixed results with this particular text-to-image model. For some words, it works pretty well, but for others it struggles to produce reasonable images. While the language space in this model still needs further exploration, as a starting point, here are some [sentences](misc/sentences.txt) that produce reasonable images.
 
 ### Using your own condition models
 * If using your own condition network, you should search for the parameters that produces the best images for your model (epsilon1, epsilon2, epsilon3 or learning rates). One simple way to do this is sweeping across different parameters.
-* Note that this script would work well with Tensorflow models as well because they all talk Python
+* Note that this script should work with Tensorflow models as well because they all talk Python
 
 ## 3. Ideas
 Here are a few (crazy?) ideas that one could play with PPGNs:
 
-1. One can generate objects in a specific region of the image, similar to `Learning What and Where to Draw` Reed et al. (2016), by conditioning on a region of the last heatmap of a fully convolutional network or a semantic segmentation network.
+1. One can generate objects in a specific region of the image, similar to `Learning What and Where to Draw` Reed et al. (2016), by conditioning on a region of the last heatmap of a fully convolutional classification network or a semantic segmentation network.
 2. Plugin a better image captioning model e.g. the [Show and Tell](https://research.googleblog.com/2016/09/show-and-tell-image-captioning-open.html)
 3. Synthesize a Music Video by sampling images conditioned on lyrics.
+4. There are more and crazier ideas to do with PPGNs, feel free to reach out if you want to chat.
 
 ## 4. Licenses
 Note that the code in this repository is licensed under MIT License, but, the pre-trained condition models used by the code have their own licenses. Please carefully check them before use. 
