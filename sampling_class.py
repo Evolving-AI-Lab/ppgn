@@ -41,7 +41,6 @@ class ClassConditionalSampler(Sampler):
 
         unit = condition['unit']
         xy = condition['xy']
-#        def forward_backward_from_x_to_class(self, net, end, unit, image, xy=0):
 
         dst = net.blobs[end]
 
