@@ -47,7 +47,8 @@ The main sampling algorithm is in [sampler.py](sampler.py). We provide two Pytho
 ### Examples
 We provide here 5 different examples as a starting point. Feel free to fork away to produce even cooler results!
 
-[1_class_conditional_sampling.sh](1_class_conditional_sampling.sh): Sampling conditioning on the class "junco" (output unit #13 of the [CaffeNet DNN](https://github.com/BVLC/caffe/tree/master/models/bvlc_reference_caffenet) trained on ImageNet dataset). This script produces a sampling chain for a single given class.
+[1_class_conditional_sampling.sh](1_class_conditional_sampling.sh): 
+Sampling conditioning on the class "junco" (output unit #13 of the [CaffeNet DNN](https://github.com/BVLC/caffe/tree/master/models/bvlc_reference_caffenet) trained on ImageNet dataset). This script produces a sampling chain for a single given class.
 * Running `./1_class_conditional_sampling.sh 13` produces this result:
 
 <p align="center">
@@ -94,6 +95,24 @@ Running the above longer could can produce [many other types of faces](examples/
 </p>
 
 Note that we often obtain mixed results with this particular text-to-image model. For some words, it works pretty well, but for others it struggles to produce reasonable images. While the language space in this model still needs further exploration, as a starting point, here are some [sentences](misc/sentences.txt) that produce reasonable images.
+
+[./6_class_conditional_sampling_from_real_image.sh](./6_class_conditional_sampling_from_real_image.sh): One can also initialize the sampling from a real image.
+
+* Running `./6_class_conditional_sampling_from_real_image.sh 980` produces this result:
+
+<p align="center">
+    <img src="examples/example6.jpg" width=700px>
+</p>
+
+[./7_inpainting.sh](./7_inpainting.sh): One can also perform "inpainting" i.e. predicting the missing pixels given the observed ones.
+
+* Running `./6_class_conditional_sampling_from_real_image.sh 980` produces this result:
+
+<p align="center">
+    <img src="examples/example7.jpg" width=800px>
+</p>
+<p align="center"><i>In each pair, the left is a real image with a random 100x100 patch masked out. The right is the result of PPGNs filling in the patch.</i></p>
+
 
 ### Using your own condition models
 * If using your own condition network, you should search for the parameters that produces the best images for your model (epsilon1, epsilon2, epsilon3 or learning rates). One simple way to do this is sweeping across different parameters.
