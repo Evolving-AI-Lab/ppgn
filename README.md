@@ -96,7 +96,7 @@ Running the above longer could can produce [many other types of faces](examples/
 
 Note that we often obtain mixed results with this particular text-to-image model. For some words, it works pretty well, but for others it struggles to produce reasonable images. While the language space in this model still needs further exploration, as a starting point, here are some [sentences](misc/sentences.txt) that produce reasonable images.
 
-[./6_class_conditional_sampling_from_real_image.sh](./6_class_conditional_sampling_from_real_image.sh): One can also initialize the sampling from a real image.
+[./6_class_conditional_sampling_from_real_image.sh](./6_class_conditional_sampling_from_real_image.sh): One can also initialize the sampling from a real image (here, [images/volcano.jpg](images/volcano.jpg)).
 
 * Running `./6_class_conditional_sampling_from_real_image.sh 980` produces this result:
 
