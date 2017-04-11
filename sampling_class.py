@@ -19,8 +19,7 @@ import util
 from sampler import Sampler
 
 if settings.gpu:
-    #caffe.set_device(1) # GPU ID
-    caffe.set_mode_gpu() # sampling on GPU (recommended for speed) 
+    caffe.set_mode_gpu() # sampling on GPU 
 
 class ClassConditionalSampler(Sampler):
 
@@ -96,6 +95,38 @@ class ClassConditionalSampler(Sampler):
     def print_progress(self, i, info, condition, prob, grad):
         print "step: %04d\t max: %4s [%.2f]\t obj: %4s [%.2f]\t norm: [%.2f]" % ( i, info['best_unit'], info['best_unit_prob'], condition['unit'], prob, norm(grad) )
 
+def get_code(encoder, path, layer, mask=None):
+    '''
+    Push the given image through an encoder (here, AlexNet) to get a code.
+    '''
+
+    # set up the inputs for the net: 
+    image_size = encoder.blobs['data'].shape[2:]    # (1, 3, 227, 227)
+    images = np.zeros_like(encoder.blobs["data"].data, dtype='float32')
+
+    in_image = scipy.misc.imread(path)
+    in_image = scipy.misc.imresize(in_image, (image_size[0], image_size[1]))
+    images[0] = np.transpose(in_image, (2, 0, 1))   # convert to (3, 227, 227) format
+
+    data = images[:,::-1]   # convert from RGB to BGR
+
+    # subtract the ImageNet mean
+    image_mean = scipy.io.loadmat('misc/ilsvrc_2012_mean.mat')['image_mean'] # (256, 256, 3)
+    topleft = util.compute_topleft(image_size, image_mean.shape[:2])
+    image_mean = image_mean[topleft[0]:topleft[0]+image_size[0], topleft[1]:topleft[1]+image_size[1]]   # crop the image mean
+    data -= np.expand_dims(np.transpose(image_mean, (2,0,1)), 0)    # mean is already BGR
+
+    if mask is not None:
+        data *= mask
+
+    # initialize the encoder
+    encoder = caffe.Net(settings.encoder_definition, settings.encoder_weights, caffe.TEST)
+
+    # extract the features
+    encoder.forward(data=data)
+    features = encoder.blobs[layer].data.copy()
+
+    return features, data
 
 def main():
 
@@ -107,9 +138,10 @@ def main():
     parser.add_argument('--reset_every', metavar='reset_iter', type=int, default=0, help='Reset the code every N iterations')
     parser.add_argument('--lr', metavar='lr', type=float, default=2.0, nargs='?', help='Learning rate')
     parser.add_argument('--lr_end', metavar='lr', type=float, default=-1.0, nargs='?', help='Ending Learning rate')
-    parser.add_argument('--epsilon2', metavar='lr', type=float, default=1.0, nargs='?', help='Ending Learning rate')
-    parser.add_argument('--epsilon1', metavar='lr', type=float, default=1.0, nargs='?', help='Ending Learning rate')
-    parser.add_argument('--epsilon3', metavar='lr', type=float, default=1.0, nargs='?', help='Ending Learning rate')
+    parser.add_argument('--epsilon1', metavar='lr', type=float, default=1.0, nargs='?', help='Prior')
+    parser.add_argument('--epsilon2', metavar='lr', type=float, default=1.0, nargs='?', help='Condition')
+    parser.add_argument('--epsilon3', metavar='lr', type=float, default=1.0, nargs='?', help='Noise')
+    parser.add_argument('--epsilon4', metavar='lr', type=float, default=0.0, nargs='?', help='Context')
     parser.add_argument('--seed', metavar='n', type=int, default=0, nargs='?', help='Random seed')
     parser.add_argument('--xy', metavar='n', type=int, default=0, nargs='?', help='Spatial position for conv units')
     parser.add_argument('--opt_layer', metavar='s', type=str, help='Layer at which we optimize a code')
@@ -137,6 +169,7 @@ def main():
     print " epsilon1: %s" % args.epsilon1
     print " epsilon2: %s" % args.epsilon2
     print " epsilon3: %s" % args.epsilon3
+    print " epsilon4: %s" % args.epsilon4
 
     print " start learning rate: %s" % args.lr
     print " end learning rate: %s" % args.lr_end
@@ -164,11 +197,26 @@ def main():
 
     # Sampler for class-conditional generation
     sampler = ClassConditionalSampler()
+    inpainting = None
 
     if args.init_file != "None":
-        start_code, start_image = sampler.get_code(encoder=encoder, path=args.init_file, layer=args.opt_layer)
 
-        print "Loaded start code: ", start_code.shape
+        # Pre-compute masks if we want to perform inpainting 
+        if args.epsilon4 > 0:
+            mask, neg = util.get_mask()
+
+        # Get the code for the masked image
+        start_code, start_image = get_code(encoder=encoder, path=args.init_file, layer=args.opt_layer, mask=neg)
+
+        # Package settings for in-painting experiments
+        if args.epsilon4 > 0:
+            inpainting = {
+                "mask"      : mask,
+                "mask_neg"  : neg,
+                "image"     : start_image
+            }
+
+        print "Loaded init code: ", start_code.shape
     else:
         # shape of the code being optimized
         shape = generator.blobs[settings.generator_in_layer].data.shape
@@ -183,12 +231,13 @@ def main():
                         gen_in_layer=settings.generator_in_layer, gen_out_layer=settings.generator_out_layer, start_code=start_code, 
                         n_iters=args.n_iters, lr=args.lr, lr_end=args.lr_end, threshold=args.threshold, 
                         layer=args.act_layer, conditions=conditions,
-                        epsilon1=args.epsilon1, epsilon2=args.epsilon2, epsilon3=args.epsilon3,
+                        epsilon1=args.epsilon1, epsilon2=args.epsilon2, epsilon3=args.epsilon3, epsilon4=args.epsilon4,
+                        inpainting=inpainting,
                         output_dir=args.output_dir, 
                         reset_every=args.reset_every, save_every=args.save_every)
 
     # Output image
-    filename = "%s/%s_%04d_%04d_%s_h_%s_%s_%s__%s.jpg" % (
+    filename = "%s/%s_%04d_%04d_%s_h_%s_%s_%s_%s__%s.jpg" % (
             args.output_dir,
             args.act_layer, 
             conditions[0]["unit"],
@@ -197,8 +246,12 @@ def main():
             str(args.epsilon1),
             str(args.epsilon2),
             str(args.epsilon3),
+            str(args.epsilon4),
             args.seed
         )
+
+    if inpainting != None:
+        output_image = util.stitch(start_image, output_image) 
 
     # Save the final image
     util.save_image(output_image, filename)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 Anh Nguyen <anh.ng8@gmail.com>
-2016
+2017
 '''
 
 import os, sys
@@ -16,39 +16,8 @@ from numpy.linalg import norm
 import scipy.misc, scipy.io
 import util
 
-
 class Sampler(object):
-    def get_code(self, encoder, path, layer):
-        '''
-        Push the given image through an encoder (here, AlexNet) to get a code.
-        '''
-
-        # set up the inputs for the net: 
-        image_size = encoder.blobs['data'].shape[2:]    # (1, 3, 227, 227)
-        images = np.zeros_like(encoder.blobs["data"].data, dtype='float32')
-
-        in_image = scipy.misc.imread(path)
-        in_image = scipy.misc.imresize(in_image, (image_size[0], image_size[1]))
-        images[0] = np.transpose(in_image, (2, 0, 1))   # convert to (3, 227, 227) format
-
-        data = images[:,::-1]   # convert from RGB to BGR
-
-        # subtract the ImageNet mean
-        image_mean = scipy.io.loadmat('misc/ilsvrc_2012_mean.mat')['image_mean'] # (256, 256, 3)
-        topleft = self.compute_topleft(image_size, image_mean.shape[:2])
-        image_mean = image_mean[topleft[0]:topleft[0]+image_size[0], topleft[1]:topleft[1]+image_size[1]]   # crop the image mean
-        data -= np.expand_dims(np.transpose(image_mean, (2,0,1)), 0)    # mean is already BGR
-
-        # initialize the encoder
-        encoder = caffe.Net(settings.encoder_definition, settings.encoder_weights, caffe.TEST)
-
-        # extract the features
-        encoder.forward(data=data)
-        features = encoder.blobs[layer].data.copy()
-
-        return features, data
-
-
+    
     def backward_from_x_to_h(self, generator, diff, start, end):
         '''
         Backpropagate the gradient from the image (start) back to the latent space (end) of the generator network.
@@ -63,22 +32,7 @@ class Sampler(object):
 
         return g
 
-    
-    def compute_topleft(self, input_size, output_size):
-        '''
-        Compute the offsets (top, left) to crop the output image if its size does not match that of the input image.
-        The output size is fixed at 256 x 256 as the generator network is trained on 256 x 256 images.
-        However, the input size often changes depending on the network.
-        '''
-
-        assert len(input_size) == 2, "input_size must be (h, w)"
-        assert len(output_size) == 2, "output_size must be (h, w)"
-
-        topleft = ((output_size[0] - input_size[0])/2, (output_size[1] - input_size[1])/2)
-        return topleft
-
-
-    def h_autoencoder_grad(self, h, encoder, decoder, gen_out_layer, topleft):
+    def h_autoencoder_grad(self, h, encoder, decoder, gen_out_layer, topleft, inpainting):
         '''
         Compute the gradient of the energy of P(input) wrt input, which is given by decode(encode(input))-input {see Alain & Bengio, 2014}.
         Specifically, we compute E(G(h)) - h.
@@ -86,19 +40,21 @@ class Sampler(object):
         '''
 
         generated = encoder.forward(feat=h)
-        x0 = encoder.blobs[gen_out_layer].data.copy()    # 256x256
+        x = encoder.blobs[gen_out_layer].data.copy()    # 256x256
         
         # Crop from 256x256 to 227x227
         image_size = decoder.blobs['data'].shape    # (1, 3, 227, 227)
-        cropped_x0 = x0[:,:,topleft[0]:topleft[0]+image_size[2], topleft[1]:topleft[1]+image_size[3]]
+        cropped_x = x[:,:,topleft[0]:topleft[0]+image_size[2], topleft[1]:topleft[1]+image_size[3]]
+
+        # Mask the image when inpainting
+        if inpainting is not None:
+            cropped_x = util.apply_mask(img=cropped_x, mask=inpainting['mask'], context=inpainting['image'])
 
         # Push this 227x227 image through net
-        decoder.forward(data=cropped_x0)
+        decoder.forward(data=cropped_x)
         code = decoder.blobs['fc6'].data
 
         g = code - h
-
-    #    print " d log(p(h)) / dh: %.2f" % norm(g)
 
         return g
 
@@ -107,7 +63,8 @@ class Sampler(object):
                 gen_in_layer, gen_out_layer, start_code, 
                 n_iters, lr, lr_end, threshold, 
                 layer, conditions, #units=None, xy=0, 
-                epsilon1=1, epsilon2=1, epsilon3=1e-10, 
+                epsilon1=1, epsilon2=1, epsilon3=1e-10, epsilon4=0,
+                inpainting=None, # in-painting args
                 output_dir=None, reset_every=0, save_every=1):
 
         # Get the input and output sizes
@@ -122,8 +79,8 @@ class Sampler(object):
         encoder_input_size = util.get_image_size(encoder_input_shape)
 
         # The top left offset to crop the output image to get a 227x227 image
-        topleft = self.compute_topleft(image_size, generator_output_size)
-        topleft_DAE = self.compute_topleft(encoder_input_size, generator_output_size)
+        topleft = util.compute_topleft(image_size, generator_output_size)
+        topleft_DAE = util.compute_topleft(encoder_input_size, generator_output_size)
 
         src = image_generator.blobs[gen_in_layer]     # the input feature layer of the generator
         
@@ -147,7 +104,7 @@ class Sampler(object):
 
             # 1. Compute the epsilon1 term ---
             # compute gradient d log(p(h)) / dh per DAE results in Alain & Bengio 2014
-            d_prior = self.h_autoencoder_grad(h=h, encoder=image_generator, decoder=image_encoder, gen_out_layer=gen_out_layer, topleft=topleft_DAE)
+            d_prior = self.h_autoencoder_grad(h=h, encoder=image_generator, decoder=image_encoder, gen_out_layer=gen_out_layer, topleft=topleft_DAE, inpainting=inpainting)
 
             # 2. Compute the epsilon2 term ---
             # Push the code through the generator to get an image x
@@ -157,10 +114,23 @@ class Sampler(object):
 
             # Crop from 256x256 to 227x227
             cropped_x = x[:,:,topleft[0]:topleft[0]+image_size[0], topleft[1]:topleft[1]+image_size[1]]
+            cropped_x_copy = cropped_x.copy()
+            
+            if inpainting is not None:
+                cropped_x = util.apply_mask(img=cropped_x, mask=inpainting['mask'], context=inpainting['image'])
 
             # Forward pass the image x to the condition net up to an unit k at the given layer
             # Backprop the gradient through the condition net to the image layer to get a gradient image 
             d_condition_x, prob, info = self.forward_backward_from_x_to_condition(net=condition_net, end=layer, image=cropped_x, condition=condition) 
+
+            if inpainting is not None:
+                # Mask out the class gradient image
+                d_condition_x[:] *= inpainting["mask"]
+
+                # An additional objective for matching the context image
+                d_context_x256 = np.zeros_like(x.copy())
+                d_context_x256[:,:,topleft[0]:topleft[0]+image_size[0], topleft[1]:topleft[1]+image_size[1]] = (inpainting["image"] - cropped_x_copy) * inpainting["mask_neg"]
+                d_context_h = self.backward_from_x_to_h(generator=image_generator, diff=d_context_x256, start=gen_in_layer, end=gen_out_layer)
 
             # Put the gradient back in the 256x256 format 
             d_condition_x256 = np.zeros_like(x)
@@ -177,8 +147,8 @@ class Sampler(object):
             if epsilon3 > 0:
                 noise = np.random.normal(0, epsilon3, h.shape)  # Gaussian noise
 
-            # Update h according to Eq.11 in the paper
-            d_h = epsilon1 * d_prior + epsilon2 * d_condition + noise
+            # Update h according to Eq.11 in the paper + the optional epsilon4 for matching the context region when in-painting
+            d_h = epsilon1 * d_prior + epsilon2 * d_condition + noise + epsilon4 * d_context_h
             h += step_size/np.abs(d_h).mean() * d_h
 
             h = np.clip(h, a_min=0, a_max=30)   # Keep the code within a realistic range

@@ -62,3 +62,80 @@ def convert_words_into_numbers(vocab_file, words):
     numbers.append( 0 )     # <unk> 
     return numbers
 
+def get_mask():
+    '''
+    Compute the binary mask to be used for inpainting experiments.
+    '''
+
+    image_shape = (3, 227, 227)
+
+    # Make a blob of noise in the center
+    mask = np.zeros(image_shape) 
+    mask_neg = np.ones(image_shape) 
+
+    # width and height of the mask
+    w, h = (100, 100)
+
+    # starting and ending positions of mask
+    max_x, max_y = image_shape[1] - w, image_shape[2] - h
+    x0 = np.random.randint(low=0, high=max_x)
+    x1 = np.min([ image_shape[1], x0 + w ])
+
+    y0 = np.random.randint(low=0, high=max_y)
+    y1 = np.min([ image_shape[2], y0 + h ])
+
+    for y in np.arange(x0, x1):
+      for x in np.arange(y0, y1):
+          mask [ :, x, y ] = 1
+          mask_neg [ :, x, y ] = 0
+
+    return mask, mask_neg
+
+
+def compute_topleft(input_size, output_size):
+    '''
+    Compute the offsets (top, left) to crop the output image if its size does not match that of the input image.
+    The output size is fixed at 256 x 256 as the generator network is trained on 256 x 256 images.
+    However, the input size often changes depending on the network.
+    '''
+
+    assert len(input_size) == 2, "input_size must be (h, w)"
+    assert len(output_size) == 2, "output_size must be (h, w)"
+
+    topleft = ((output_size[0] - input_size[0])/2, (output_size[1] - input_size[1])/2)
+    return topleft
+
+
+def apply_mask(img, mask, context):
+
+    assert len(img.shape) == 4
+    assert img.shape[0] == 1
+    assert img.shape[1] == 3
+
+    # Mask out a patch (defined by the binary "mask")
+    img[0] *= mask
+    img += context
+
+    return img
+
+
+def stitch(left, right):
+    '''
+    Stitch two images together horizontally.
+    '''
+    
+    assert len(left.shape) == 4
+    assert len(right.shape) == 4
+    assert left.shape[0] == 1
+    assert right.shape[0] == 1
+
+    # Save final image and the masked image
+    image_size = right.shape[2]
+    separator_width = 1
+    canvas_size = image_size * 2 + separator_width
+    output = np.zeros( (1, 3, image_size, canvas_size) )
+    output.fill(255.0) 
+    output[:,:,:image_size,:image_size] = left
+    output[:,:,:,image_size + separator_width:] = right
+
+    return output
