@@ -63,7 +63,7 @@ class Sampler(object):
                 gen_in_layer, gen_out_layer, start_code, 
                 n_iters, lr, lr_end, threshold, 
                 layer, conditions, #units=None, xy=0, 
-                epsilon1=1, epsilon2=1, epsilon3=1e-10, epsilon4=0,
+                epsilon1=1, epsilon2=1, epsilon3=1e-10,
                 inpainting=None, # in-painting args
                 output_dir=None, reset_every=0, save_every=1):
 
@@ -147,8 +147,13 @@ class Sampler(object):
             if epsilon3 > 0:
                 noise = np.random.normal(0, epsilon3, h.shape)  # Gaussian noise
 
-            # Update h according to Eq.11 in the paper + the optional epsilon4 for matching the context region when in-painting
-            d_h = epsilon1 * d_prior + epsilon2 * d_condition + noise + epsilon4 * d_context_h
+            # Update h according to Eq.11 in the paper 
+            d_h = epsilon1 * d_prior + epsilon2 * d_condition + noise
+
+            # Plus the optional epsilon4 for matching the context region when in-painting
+            if inpainting is not None:
+                d_h += inpainting["epsilon4"] * d_context_h 
+
             h += step_size/np.abs(d_h).mean() * d_h
 
             h = np.clip(h, a_min=0, a_max=30)   # Keep the code within a realistic range

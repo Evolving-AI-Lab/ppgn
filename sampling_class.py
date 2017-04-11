@@ -213,7 +213,8 @@ def main():
             inpainting = {
                 "mask"      : mask,
                 "mask_neg"  : neg,
-                "image"     : start_image
+                "image"     : start_image,
+                "epsilon4"  : args.epsilon4
             }
 
         print "Loaded init code: ", start_code.shape
@@ -231,7 +232,7 @@ def main():
                         gen_in_layer=settings.generator_in_layer, gen_out_layer=settings.generator_out_layer, start_code=start_code, 
                         n_iters=args.n_iters, lr=args.lr, lr_end=args.lr_end, threshold=args.threshold, 
                         layer=args.act_layer, conditions=conditions,
-                        epsilon1=args.epsilon1, epsilon2=args.epsilon2, epsilon3=args.epsilon3, epsilon4=args.epsilon4,
+                        epsilon1=args.epsilon1, epsilon2=args.epsilon2, epsilon3=args.epsilon3,
                         inpainting=inpainting,
                         output_dir=args.output_dir, 
                         reset_every=args.reset_every, save_every=args.save_every)
