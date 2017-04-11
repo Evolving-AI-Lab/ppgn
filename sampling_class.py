@@ -204,6 +204,8 @@ def main():
         # Pre-compute masks if we want to perform inpainting 
         if args.epsilon4 > 0:
             mask, neg = util.get_mask()
+        else:
+            neg = None
 
         # Get the code for the masked image
         start_code, start_image = get_code(encoder=encoder, path=args.init_file, layer=args.opt_layer, mask=neg)
