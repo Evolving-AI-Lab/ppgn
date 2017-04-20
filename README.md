@@ -96,7 +96,7 @@ Running the above longer could can produce [many other types of faces](examples/
 
 Note that we often obtain mixed results with this particular text-to-image model. For some words, it works pretty well, but for others it struggles to produce reasonable images. While the language space in this model still needs further exploration, as a starting point, here are some [sentences](misc/sentences.txt) that produce reasonable images.
 
-[./6_class_conditional_sampling_from_real_image.sh](./6_class_conditional_sampling_from_real_image.sh): One can also initialize the sampling from a real image (here, [images/volcano.jpg](images/volcano.jpg)).
+[6_class_conditional_sampling_from_real_image.sh](6_class_conditional_sampling_from_real_image.sh): One can also initialize the sampling from a real image (here, [images/volcano.jpg](images/volcano.jpg)).
 
 * Running `./6_class_conditional_sampling_from_real_image.sh 980` produces this result:
 
@@ -104,9 +104,9 @@ Note that we often obtain mixed results with this particular text-to-image model
     <img src="examples/example6.jpg" width=700px>
 </p>
 
-[./7_inpainting.sh](./7_inpainting.sh): One can also perform "inpainting" i.e. predicting the missing pixels given the observed ones.
+[7_inpainting.sh](7_inpainting.sh): One can also perform "inpainting" i.e. predicting the missing pixels given the observed ones.
 
-* Running `./6_class_conditional_sampling_from_real_image.sh 980` produces this result:
+* Running `./7_inpainting.sh` produces this result:
 
 <p align="center">
     <img src="examples/example7.jpg" width=800px>
