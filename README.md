@@ -2,17 +2,17 @@
 
 This repository contains source code necessary to reproduce some of the main results in the paper:
 
-[Nguyen A](http://anhnguyen.me), [Yosinski J](http://yosinski.com/), [Bengio Y](http://www-labs.iro.umontreal.ca/~bengioy/yoshua_en/), [Dosovitskiy A](http://lmb.informatik.uni-freiburg.de/people/dosovits/), [Clune J](http://jeffclune.com). (2016). ["Plug & Play Generative Networks: Conditional Iterative Generation of Images in Latent Space"](http://arxiv.org/abs/1612.00005v1). arXiv:1612.00005v1.
+[Nguyen A](http://anhnguyen.me), [Clune J](http://jeffclune.com), [Bengio Y](http://www-labs.iro.umontreal.ca/~bengioy/yoshua_en/), [Dosovitskiy A](http://lmb.informatik.uni-freiburg.de/people/dosovits/), [Yosinski J](http://yosinski.com/). (2017). ["Plug & Play Generative Networks: Conditional Iterative Generation of Images in Latent Space"](http://arxiv.org/abs/1612.00005v1). Computer Vision and Pattern Recognition.
 
 **If you use this software in an academic article, please consider citing:**
 
-    @article{nguyen2016ppgn,
-      title={Plug & Play Generative Networks: Conditional Iterative Generation of Images in Latent Space},
-      author={Nguyen, Anh and Yosinski, Jason and Bengio, Yoshua and Dosovitskiy, Alexey and Clune, Jeff},
-      journal={arXiv preprint 1612.00005},
-      year={2016}
+    @inproceedings{nguyen2017plug,
+      title={Plug \& Play Generative Networks: Conditional Iterative Generation of Images in Latent Space},
+      author={Nguyen, Anh and Clune, Jeff and Bengio, Yoshua and Dosovitskiy, Alexey and Yosinski, Jason},
+      booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+      year={2017},
+      organization={IEEE}
     }
-
 For more information regarding the paper, please visit www.evolvingai.org/ppgn
 
 ## 1. Setup
